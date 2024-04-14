@@ -18,21 +18,17 @@ public class SimpleSupplierNomenclatureRepository implements SupplierNomenclatur
     }
 
     @Override
-    @Transactional
+    //@Transactional
     public void saveAll(List<SupplierNomenclature> products) {
+        for(var product:products) {
+            jdbcTemplate.update("INSERT INTO supplier_nomenclature (pn_draft,fabric,linked_info, storage_id,gn_id, name) VALUES ('%s','%s','%s','%d','%d','%s')"
+                    .formatted(escape(product.getPnDraft()), escape(product.getFabric()), product.getLinkedInfo(), product.getStorageId(), product.getGnId(), escape(product.getName())));
+        }
+    }
+    public String escape(String s){
+        // Для запросов !    "    $    '    (    )    -    /    <    @    \    ^    |    ~
+        return s.replace("\\","\\\\")
+                .replace("'","\\'");
 
-        jdbcTemplate.batchUpdate("INSERT INTO supplier_nomenclature (pn_clean,pn_draft,fabric,linked_info, storage_id,gn_id, name) " +
-                        "VALUES (?, ?, ?, ?,?,?,?)",
-                products,
-                8000,
-                (PreparedStatement ps, SupplierNomenclature product) -> {
-                    ps.setString(1, product.getPnClean());
-                    ps.setString(2, product.getPnDraft());
-                    ps.setString(3, product.getFabric());
-                    ps.setString(4, product.getLinkedInfo());
-                    ps.setInt(5, product.getStorageId());
-                    ps.setInt(6, product.getGnId());
-                    ps.setString(7, product.getName());
-                });
     }
 }

@@ -1,6 +1,7 @@
 package pro.adeo.sn2rs;
 
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 import pro.adeo.sn2rs.sr.model.SupplierNomenclature;
@@ -12,7 +13,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 @Service
 public class BatchService {
-
+    @Value("${spring.jpa.properties.hibernate.jdbc.batch_size}")
+    private int batch_size;
     private JdbcTemplate jdbcTemplate;
     SupplierNomenclatureRepository snRepository;
 
@@ -26,7 +28,7 @@ public class BatchService {
         List<SupplierNomenclature> batch= new ArrayList<>();
         var result = jdbcTemplate.queryForObject("select now()", String.class);
         System.out.println("Time from PG DB: "+result);
-        jdbcTemplate.setFetchSize(8000);
+        jdbcTemplate.setFetchSize(batch_size);
         jdbcTemplate.query("select * from prices.supplier_nomenclature", rs -> {
             while (rs.next()) {
 
@@ -45,7 +47,7 @@ public class BatchService {
 
                     ));
                 }
-                if (batch.size()>=8000){
+                if (batch.size()>=batch_size){
                     flushBatch(batch);
                     batch.clear();
                 }
