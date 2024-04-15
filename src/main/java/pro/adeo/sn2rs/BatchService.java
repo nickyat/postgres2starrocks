@@ -15,6 +15,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class BatchService {
     @Value("${spring.jpa.properties.hibernate.jdbc.batch_size}")
     private int batch_size;
+    @Value("${shard}")
+    private int shard;
     private JdbcTemplate jdbcTemplate;
     SupplierNomenclatureRepository snRepository;
 
@@ -29,11 +31,11 @@ public class BatchService {
         var result = jdbcTemplate.queryForObject("select now()", String.class);
         System.out.println("Time from PG DB: "+result);
         jdbcTemplate.setFetchSize(batch_size);
-        jdbcTemplate.query("select * from prices.supplier_nomenclature", rs -> {
+        jdbcTemplate.query("select * from prices.supplier_nomenclature where id%5=" + shard, rs -> {
             while (rs.next()) {
 
                 // process it
-                if (rs.getString("pn_draft").length()+ rs.getString("fabric").length()<70) {
+                if (rs.getString("pn_draft") != null && rs.getString("fabric") != null) {
                     batch.add(new SupplierNomenclature(
                             rs.getLong("id"),
                             rs.getString("pn_clean"),
