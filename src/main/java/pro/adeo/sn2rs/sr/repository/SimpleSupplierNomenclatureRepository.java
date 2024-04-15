@@ -1,5 +1,6 @@
 package pro.adeo.sn2rs.sr.repository;
 
+import jakarta.annotation.PostConstruct;
 import org.apache.lucene.document.*;
 import org.apache.lucene.index.*;
 import org.apache.lucene.search.IndexSearcher;
@@ -8,6 +9,7 @@ import org.apache.lucene.search.TermQuery;
 import org.apache.lucene.search.TopDocs;
 import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.FSDirectory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Repository;
 import pro.adeo.sn2rs.sr.model.SupplierNomenclature;
 
@@ -19,12 +21,15 @@ import java.util.List;
 @Repository
 public class SimpleSupplierNomenclatureRepository implements SupplierNomenclatureRepository {
 
-    Path tmpDir = Path.of("/tmp/sn");
+    @Value("${index.dir}")
+    private String indexDir;
+
     private IndexWriter writer;
     private Directory directory;
 
-    public SimpleSupplierNomenclatureRepository() throws IOException {
-        directory = FSDirectory.open(tmpDir);
+    @PostConstruct
+    public void init() throws IOException {
+        directory = FSDirectory.open(Path.of(indexDir));
         writer = new IndexWriter(directory, new IndexWriterConfig());
     }
 
