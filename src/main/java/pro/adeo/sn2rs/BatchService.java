@@ -1,11 +1,10 @@
 package pro.adeo.sn2rs;
 
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 import pro.adeo.sn2rs.sr.model.SupplierNomenclature;
-import pro.adeo.sn2rs.sr.repository.SupplierNomenclatureRepository;
+import pro.adeo.sn2rs.sr.repository.SimpleSupplierNomenclatureService;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -14,17 +13,16 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 @Service
 public class BatchService {
-    @Value("${index.fetch.limit}")
-    private int fetchLimit;
-    private final JdbcTemplate jdbcTemplate;
-    private final SupplierNomenclatureRepository snRepository;
 
-    public BatchService(@Qualifier(value = "pgJdbcTemplate") JdbcTemplate jdbcTemplate, SupplierNomenclatureRepository snRepository) {
+    private final JdbcTemplate jdbcTemplate;
+    private SimpleSupplierNomenclatureService simpleSupplierNomenclatureService;
+
+    public BatchService(@Qualifier(value = "pgJdbcTemplate") JdbcTemplate jdbcTemplate, SimpleSupplierNomenclatureService simpleSupplierNomenclatureService) {
         this.jdbcTemplate = jdbcTemplate;
-        this.snRepository = snRepository;
+        this.simpleSupplierNomenclatureService = simpleSupplierNomenclatureService;
     }
 
-    void run() throws IOException {
+    public String fillSn(Integer fetchLimit) throws IOException {
         AtomicInteger count = new AtomicInteger();
         List<SupplierNomenclature> batch = new ArrayList<>();
         var result = jdbcTemplate.queryForObject("select now()", String.class);
@@ -75,13 +73,12 @@ public class BatchService {
                 throw new RuntimeException(e);
             }
         }
-// try search
-        snRepository.result();
+        simpleSupplierNomenclatureService.closeIndex();
+        return "Done";
     }
 
     private void flushBatch(List<SupplierNomenclature> batch) throws IOException {
-        snRepository.saveAll(batch);
+        simpleSupplierNomenclatureService.saveAll(batch);
     }
-
 
 }
