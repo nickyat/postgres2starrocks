@@ -60,7 +60,7 @@ public class LuceneController {
     @Operation(summary = "поиск через QueryParser (для text полей)")
     @GetMapping("/queryParser")
     List<Document> search(@RequestParam String inField, @RequestParam String queryString) throws IOException, ParseException {
-        return luceneService.search(inField, queryString);
+        return luceneService.querySearch(inField, queryString);
     }
 
     @Operation(summary = "поиск через TerrmQuery (string поля, сase sensitive)")

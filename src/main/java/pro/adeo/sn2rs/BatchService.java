@@ -3,7 +3,9 @@ package pro.adeo.sn2rs;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
+import pro.adeo.sn2rs.sr.model.GoodsNomenclature;
 import pro.adeo.sn2rs.sr.model.SupplierNomenclature;
+import pro.adeo.sn2rs.sr.repository.SimpleGoodsNomenclatureService;
 import pro.adeo.sn2rs.sr.repository.SimpleSupplierNomenclatureService;
 
 import java.io.IOException;
@@ -16,10 +18,15 @@ public class BatchService {
 
     private final JdbcTemplate jdbcTemplate;
     private SimpleSupplierNomenclatureService simpleSupplierNomenclatureService;
+    private SimpleGoodsNomenclatureService simpleGoodsNomenclatureService;
 
-    public BatchService(@Qualifier(value = "pgJdbcTemplate") JdbcTemplate jdbcTemplate, SimpleSupplierNomenclatureService simpleSupplierNomenclatureService) {
+    public BatchService(@Qualifier(value = "pgJdbcTemplate") JdbcTemplate jdbcTemplate,
+                        SimpleSupplierNomenclatureService simpleSupplierNomenclatureService,
+                        SimpleGoodsNomenclatureService simpleGoodsNomenclatureService
+    ) {
         this.jdbcTemplate = jdbcTemplate;
         this.simpleSupplierNomenclatureService = simpleSupplierNomenclatureService;
+        this.simpleGoodsNomenclatureService = simpleGoodsNomenclatureService;
     }
 
     public String fillSn(Integer fetchLimit) throws IOException {
@@ -54,7 +61,7 @@ public class BatchService {
                 }
                 if (batch.size() >= 8000) {
                     try {
-                        flushBatch(batch);
+                        simpleSupplierNomenclatureService.saveAll(batch);
                     } catch (IOException e) {
                         throw new RuntimeException(e);
                     }
@@ -68,7 +75,7 @@ public class BatchService {
         });
         if (!batch.isEmpty()) {
             try {
-                flushBatch(batch);
+                simpleSupplierNomenclatureService.saveAll(batch);
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
@@ -77,8 +84,57 @@ public class BatchService {
         return "Done";
     }
 
-    private void flushBatch(List<SupplierNomenclature> batch) throws IOException {
-        simpleSupplierNomenclatureService.saveAll(batch);
+    public String fillGn(Integer fetchLimit) throws IOException {
+        AtomicInteger count = new AtomicInteger();
+        List<GoodsNomenclature> batch = new ArrayList<>();
+        var result = jdbcTemplate.queryForObject("select now()", String.class);
+        System.out.println("Time from PG DB: " + result);
+        jdbcTemplate.setFetchSize(8000);
+        String limitTerm = "";
+        if (fetchLimit > 0) {
+            limitTerm = " limit " + fetchLimit;
+        }
+        jdbcTemplate.query("select * from prices.goods_nomenclature " + limitTerm, rs -> {
+            while (rs.next()) {
+
+                // process it
+                if (rs.getString("pn_draft") != null && rs.getString("fabric") != null) {
+                    batch.add(new GoodsNomenclature(
+                            rs.getLong("id"),
+                            rs.getString("pn_clean"),
+                            rs.getString("pn_draft"),
+                            rs.getString("fabric"),
+                            rs.getInt("category_id"),
+                            rs.getInt("gid"),
+                            rs.getString("name")
+                    ));
+                } else {
+                    System.out.printf("skip: pn_draft: %s fabric: %s %s %n", rs.getString("pn_draft"), rs.getString("fabric"), rs.getString("name"));
+                }
+                if (batch.size() >= 8000) {
+                    try {
+                        simpleGoodsNomenclatureService.saveAll(batch);
+                    } catch (IOException e) {
+                        throw new RuntimeException(e);
+                    }
+                    batch.clear();
+                }
+                count.getAndIncrement();
+                if (count.get() % 10000 == 0) {
+                    System.out.println("rows: " + count.get());
+                }
+            }
+        });
+        if (!batch.isEmpty()) {
+            try {
+                simpleGoodsNomenclatureService.saveAll(batch);
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        }
+        simpleGoodsNomenclatureService.closeIndex();
+        return "Done";
     }
+
 
 }

@@ -1,4 +1,4 @@
-package pro.adeo.sn2rs.sr;
+package pro.adeo.sn2rs.sr.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -20,9 +20,15 @@ public class SrController {
 
 
     @Operation(summary = "заполнить index из SupplierNomenclature")
-    @PostMapping("/fillSn")
-    String fillSn(@RequestParam Integer limit) throws IOException {
+    @PostMapping("/fillOffers")
+    String fillOffers(@RequestParam Integer limit) throws IOException {
         return batchService.fillSn(limit);
+    }
+
+    @Operation(summary = "заполнить index из GoodsNomenclature")
+    @PostMapping("/fillProduct")
+    String fillProduct(@RequestParam Integer limit) throws IOException {
+        return batchService.fillGn(limit);
     }
 
 }

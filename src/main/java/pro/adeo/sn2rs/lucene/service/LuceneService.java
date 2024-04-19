@@ -36,18 +36,26 @@ public class LuceneService {
     private static final String FIELD_NAME = "sampleName";
     @Value("${index.dir}")
     private String indexDir;
-    private IndexSearcher searcher;
+    private IndexSearcher searcherSn;
+    private IndexSearcher searcherGn;
     private StandardAnalyzer analyzer;
 
     @PostConstruct
     void init() throws IOException {
         try {
-            var directory = FSDirectory.open(Path.of(indexDir));
-            IndexReader indexReader = DirectoryReader.open(directory);
-            searcher = new IndexSearcher(indexReader);
+            var directorySn = FSDirectory.open(Path.of(indexDir + "/offers"));
+            IndexReader indexReaderSn = DirectoryReader.open(directorySn);
+            searcherSn = new IndexSearcher(indexReaderSn);
             analyzer = new StandardAnalyzer();
         } catch (IndexNotFoundException e) {
-            log.error("Index не найден: {}", indexDir);
+            log.error("Index [offers] не найден: {}", indexDir);
+        }
+        try {
+            var directoryGn = FSDirectory.open(Path.of(indexDir + "/product"));
+            IndexReader indexReaderGn = DirectoryReader.open(directoryGn);
+            searcherSn = new IndexSearcher(indexReaderGn);
+        } catch (IndexNotFoundException e) {
+            log.error("Index [product] не найден: {}", indexDir);
         }
     }
 
@@ -90,23 +98,23 @@ public class LuceneService {
         return analyze(text, new RussianAnalyzer());
     }
 
-    public List<Document> search(String inField, String queryString) throws IOException, ParseException {
+    public List<Document> querySearch(String inField, String queryString) throws IOException, ParseException {
         Query query = new QueryParser(inField, analyzer)
                 .parse(queryString);
-        TopDocs topDocs = searcher.search(query, 20);
+        TopDocs topDocs = searcherSn.search(query, 20);
         List<Document> documents = new ArrayList<>();
         for (ScoreDoc scoreDoc : topDocs.scoreDocs) {
-            documents.add(searcher.doc(scoreDoc.doc));
+            documents.add(searcherSn.storedFields().document(scoreDoc.doc));
         }
         return documents;
     }
 
     public List<Document> term(String inField, String queryString) throws IOException, ParseException {
         Query query = new TermQuery(new Term(inField, queryString));
-        TopDocs topDocs = searcher.search(query, 20);
+        TopDocs topDocs = searcherSn.search(query, 20);
         List<Document> documents = new ArrayList<>();
         for (ScoreDoc scoreDoc : topDocs.scoreDocs) {
-            documents.add(searcher.doc(scoreDoc.doc));
+            documents.add(searcherSn.doc(scoreDoc.doc));
         }
         return documents;
     }
