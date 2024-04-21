@@ -2,8 +2,6 @@ package pro.adeo.sn2rs.lucene.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import org.apache.lucene.document.Document;
-import org.apache.lucene.queryparser.classic.ParseException;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -14,10 +12,10 @@ import java.util.List;
 
 @RestController
 @Tag(name = "Токенизатор: получить список токенов")
-public class LuceneController {
+public class AnalyzerController {
     private final LuceneService luceneService;
 
-    public LuceneController(LuceneService luceneService) {
+    public AnalyzerController(LuceneService luceneService) {
         this.luceneService = luceneService;
     }
 
@@ -55,18 +53,6 @@ public class LuceneController {
     @GetMapping("/useRussianAnalyzer")
     List<String> useRussianAnalyzer(@RequestParam String text) throws IOException {
         return luceneService.RussianAnalyzer(text);
-    }
-
-    @Operation(summary = "поиск через QueryParser (для text полей)")
-    @GetMapping("/queryParser")
-    List<Document> search(@RequestParam String inField, @RequestParam String queryString) throws IOException, ParseException {
-        return luceneService.querySearch(inField, queryString);
-    }
-
-    @Operation(summary = "поиск через TerrmQuery (string поля, сase sensitive)")
-    @GetMapping("/termQuery")
-    List<Document> term(@RequestParam String inField, @RequestParam String queryString) throws IOException, ParseException {
-        return luceneService.term(inField, queryString);
     }
 
 }

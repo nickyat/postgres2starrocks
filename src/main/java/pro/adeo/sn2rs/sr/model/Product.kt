@@ -1,6 +1,6 @@
 package pro.adeo.sn2rs.sr.model
 
-data class GoodsNomenclature(
+data class Product(
     var id: Long = 0,
     var pnClean: String,
     var pnDraft: String,

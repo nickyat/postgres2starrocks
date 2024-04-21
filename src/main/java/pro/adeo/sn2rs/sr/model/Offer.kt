@@ -1,6 +1,6 @@
 package pro.adeo.sn2rs.sr.model
 
-data class SupplierNomenclature(
+data class Offer(
     var id: Long = 0,
      var pnClean: String,
     var pnDraft: String,

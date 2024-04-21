@@ -1,4 +1,4 @@
-package pro.adeo.sn2rs.sr.repository;
+package pro.adeo.sn2rs.sr.service;
 
 import jakarta.annotation.PostConstruct;
 import org.apache.lucene.analysis.core.KeywordAnalyzer;
@@ -10,7 +10,7 @@ import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.FSDirectory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-import pro.adeo.sn2rs.sr.model.SupplierNomenclature;
+import pro.adeo.sn2rs.sr.model.Offer;
 
 import java.io.IOException;
 import java.nio.file.Path;
@@ -32,7 +32,7 @@ public class SimpleSupplierNomenclatureService {
     }
 
 
-    public void saveAll(List<SupplierNomenclature> products) throws IOException {
+    public void saveAll(List<Offer> products) throws IOException {
         if (writer == null) {
             writer = new IndexWriter(directory, new IndexWriterConfig(new KeywordAnalyzer()));
         }
@@ -42,7 +42,7 @@ public class SimpleSupplierNomenclatureService {
 
     }
 
-    private List<List<IndexableField>> createDocument(List<SupplierNomenclature> products) {
+    private List<List<IndexableField>> createDocument(List<Offer> products) {
         List<List<IndexableField>> docs = new ArrayList<>();
         for (var product : products) {
             List<IndexableField> doc = new ArrayList<>();

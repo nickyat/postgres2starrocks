@@ -22,13 +22,13 @@ public class SrController {
     @Operation(summary = "заполнить index из SupplierNomenclature")
     @PostMapping("/fillOffers")
     String fillOffers(@RequestParam Integer limit) throws IOException {
-        return batchService.fillSn(limit);
+        return batchService.fillOfferIndex(limit);
     }
 
     @Operation(summary = "заполнить index из GoodsNomenclature")
     @PostMapping("/fillProduct")
     String fillProduct(@RequestParam Integer limit) throws IOException {
-        return batchService.fillGn(limit);
+        return batchService.fillProductIndex(limit);
     }
 
 }

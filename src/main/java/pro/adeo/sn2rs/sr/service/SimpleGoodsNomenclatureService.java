@@ -1,4 +1,4 @@
-package pro.adeo.sn2rs.sr.repository;
+package pro.adeo.sn2rs.sr.service;
 
 import jakarta.annotation.PostConstruct;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
@@ -13,7 +13,7 @@ import org.apache.lucene.store.Directory;
 import org.apache.lucene.store.FSDirectory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-import pro.adeo.sn2rs.sr.model.GoodsNomenclature;
+import pro.adeo.sn2rs.sr.model.Product;
 
 import java.io.IOException;
 import java.nio.file.Path;
@@ -35,7 +35,7 @@ public class SimpleGoodsNomenclatureService {
     }
 
 
-    public void saveAll(List<GoodsNomenclature> products) throws IOException {
+    public void saveAll(List<Product> products) throws IOException {
         if (writer == null) {
             writer = new IndexWriter(directory, new IndexWriterConfig(new StandardAnalyzer()));
         }
@@ -45,7 +45,7 @@ public class SimpleGoodsNomenclatureService {
 
     }
 
-    private List<List<IndexableField>> createDocument(List<GoodsNomenclature> products) {
+    private List<List<IndexableField>> createDocument(List<Product> products) {
         List<List<IndexableField>> docs = new ArrayList<>();
         for (var product : products) {
             List<IndexableField> doc = new ArrayList<>();
