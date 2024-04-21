@@ -36,23 +36,25 @@ public class SimpleSupplierNomenclatureService {
         if (writer == null) {
             writer = new IndexWriter(directory, new IndexWriterConfig(new KeywordAnalyzer()));
         }
-        for (var doc : createDocument(products)) {
+        for (var doc : createOfferDocument(products)) {
             writer.addDocument(doc);
         }
 
     }
 
-    private List<List<IndexableField>> createDocument(List<Offer> products) {
+    private List<List<IndexableField>> createOfferDocument(List<Offer> offers) {
         List<List<IndexableField>> docs = new ArrayList<>();
-        for (var product : products) {
+        for (var offer : offers) {
             List<IndexableField> doc = new ArrayList<>();
-            doc.add(new StringField("pn_draft", product.getPnDraft(), Field.Store.YES));
-            doc.add(new StringField("fabric", product.getFabric(), Field.Store.YES));
-            doc.add(new TextField("name", product.getName(), Field.Store.YES));
-            doc.add(new IntField("storage_id", product.getStorageId(), Field.Store.YES));
-            doc.add(new IntField("gn_id", product.getGnId(), Field.Store.YES));
-            if (product.getLinkedInfo() != null) {
-                doc.add(new StoredField("linked_info", product.getLinkedInfo()));
+            doc.add(new LongField("offer_id", offer.getOfferId(), Field.Store.YES));
+            doc.add(new StringField("pn_clean", offer.getPnClean(), Field.Store.YES));
+            doc.add(new StringField("pn_draft", offer.getPnDraft(), Field.Store.YES));
+            doc.add(new StringField("fabric", offer.getFabric(), Field.Store.YES));
+            doc.add(new TextField("name", offer.getName(), Field.Store.YES));
+            doc.add(new IntField("storage_id", offer.getStorageId(), Field.Store.YES));
+            doc.add(new IntField("gn_id", offer.getGnId(), Field.Store.YES));
+            if (offer.getLinkedInfo() != null) {
+                doc.add(new StoredField("linked_info", offer.getLinkedInfo()));
             }
             docs.add(doc);
         }

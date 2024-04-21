@@ -39,17 +39,19 @@ public class SimpleGoodsNomenclatureService {
         if (writer == null) {
             writer = new IndexWriter(directory, new IndexWriterConfig(new StandardAnalyzer()));
         }
-        for (var doc : createDocument(products)) {
+        for (var doc : createProductDocument(products)) {
             writer.addDocument(doc);
         }
 
     }
 
-    private List<List<IndexableField>> createDocument(List<Product> products) {
+    private List<List<IndexableField>> createProductDocument(List<Product> products) {
         List<List<IndexableField>> docs = new ArrayList<>();
         for (var product : products) {
             List<IndexableField> doc = new ArrayList<>();
+            doc.add(new IntField("product_id", product.getProductId(), Field.Store.YES));
             doc.add(new StringField("pn_draft", product.getPnDraft(), Field.Store.YES));
+            doc.add(new StringField("pn_clean", product.getPnClean(), Field.Store.YES));
             doc.add(new StringField("fabric", product.getFabric(), Field.Store.YES));
             doc.add(new TextField("name", product.getName(), Field.Store.YES));
             doc.add(new IntField("category_id", product.getCategoryId(), Field.Store.YES));
