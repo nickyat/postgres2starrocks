@@ -38,7 +38,7 @@ public class LuceneService {
     private String indexDir;
     private IndexSearcher searcherSn;
     private IndexSearcher searcherGn;
-    private StandardAnalyzer analyzer;
+    private KeywordAnalyzer analyzer;
 
     @PostConstruct
     void init() throws IOException {
@@ -46,7 +46,7 @@ public class LuceneService {
             var directorySn = FSDirectory.open(Path.of(indexDir + "/offers"));
             IndexReader indexReaderSn = DirectoryReader.open(directorySn);
             searcherSn = new IndexSearcher(indexReaderSn);
-            analyzer = new StandardAnalyzer();
+            analyzer = new KeywordAnalyzer();
         } catch (IndexNotFoundException e) {
             log.error("Index [offers] не найден: {}", indexDir);
         }
@@ -109,7 +109,7 @@ public class LuceneService {
         return documents;
     }
 
-    public List<Document> term(String inField, String queryString) throws IOException, ParseException {
+    public List<Document> term(String inField, String queryString) throws IOException {
         Query query = new TermQuery(new Term(inField, queryString));
         TopDocs topDocs = searcherSn.search(query, 20);
         List<Document> documents = new ArrayList<>();

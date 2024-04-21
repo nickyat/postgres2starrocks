@@ -1,7 +1,7 @@
 package pro.adeo.sn2rs.sr.repository;
 
 import jakarta.annotation.PostConstruct;
-import org.apache.lucene.analysis.standard.StandardAnalyzer;
+import org.apache.lucene.analysis.core.KeywordAnalyzer;
 import org.apache.lucene.document.*;
 import org.apache.lucene.index.IndexWriter;
 import org.apache.lucene.index.IndexWriterConfig;
@@ -34,7 +34,7 @@ public class SimpleSupplierNomenclatureService {
 
     public void saveAll(List<SupplierNomenclature> products) throws IOException {
         if (writer == null) {
-            writer = new IndexWriter(directory, new IndexWriterConfig(new StandardAnalyzer()));
+            writer = new IndexWriter(directory, new IndexWriterConfig(new KeywordAnalyzer()));
         }
         for (var doc : createDocument(products)) {
             writer.addDocument(doc);
