@@ -10,7 +10,7 @@ data class Offer(
     var linkedInfo: String?,
     var storageId: String,
     var regStorageId: String,
-    var gnId: String,
+    var gnId: String?,
     var name: String,
     var cost: Int,
     var minCnt: Int?,

@@ -65,7 +65,9 @@ public class SimpleSupplierNomenclatureService {
             doc.add(new KeywordField("storage_id", offer.getStorageId(), Field.Store.YES));
             doc.add(new KeywordField("reg_storage_id", offer.getRegStorageId(), Field.Store.YES));
 
-            doc.add(new StringField(toField, offer.getGnId(), Field.Store.YES));
+            if (offer.getGnId() != null) {
+                doc.add(new StringField(toField, offer.getGnId(), Field.Store.YES));
+            }
             doc.add(new SortedDocValuesField(toField, new BytesRef(offer.getGnId())));
 
             doc.add(new IntField("cost", offer.getCost(), Field.Store.YES));
