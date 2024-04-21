@@ -39,22 +39,29 @@ public class BatchService {
         if (fetchLimit > 0) {
             limitTerm = " limit " + fetchLimit;
         }
-        jdbcTemplate.query("select * from prices.supplier_nomenclature where gn_id=5765 " + limitTerm, rs -> {
+        // where gn_id=5765
+        jdbcTemplate.query("select * from prices.supplier_nomenclature s left join prices.supplier_nomenclature_price p on p.id=s.id " + limitTerm, rs -> {
             do {
 
                 // process it
                 if (rs.getString("pn_draft") != null && rs.getString("fabric") != null) {
                     batch.add(new Offer(
-                            rs.getLong("id"),
+                            rs.getString("id"),
                             rs.getString("pn_clean"),
                             rs.getString("pn_draft"),
                             rs.getString("fabric"),
                             rs.getString("linked_info"),
 
-                            rs.getInt("storage_id"),
-                            rs.getInt("gn_id"),
-                            rs.getString("name")
-
+                            rs.getString("storage_id"),
+                            "0",
+                            rs.getString("gn_id"),
+                            rs.getString("name"),
+                            Math.round(rs.getFloat("min_cost") * 100),
+                            rs.getInt("moq"),
+                            "10",
+                            rs.getString("supplier_code"),
+                            rs.getDate("last_available"),
+                            rs.getBoolean("in_price")
                     ));
                 } else {
                     System.out.printf("skip: pn_draft: %s fabric: %s %s %n", rs.getString("pn_draft"), rs.getString("fabric"), rs.getString("name"));
@@ -94,17 +101,18 @@ public class BatchService {
         if (fetchLimit > 0) {
             limitTerm = " limit " + fetchLimit;
         }
-        jdbcTemplate.query("select * from prices.goods_nomenclature where id in (5765) " + limitTerm, rs -> {
+        // where id in (5765)
+        jdbcTemplate.query("select * from prices.goods_nomenclature  " + limitTerm, rs -> {
             do {
                 // process it
                 if (rs.getString("pn_draft") != null && rs.getString("fabric") != null) {
                     batch.add(new Product(
-                            rs.getLong("id"),
+                            rs.getString("id"),
                             rs.getString("pn_clean"),
                             rs.getString("pn_draft"),
                             rs.getString("fabric"),
-                            rs.getInt("category_id"),
-                            rs.getInt("gid"),
+                            rs.getString("category_id"),
+                            rs.getString("gid"),
                             rs.getString("name")
                     ));
                 } else {

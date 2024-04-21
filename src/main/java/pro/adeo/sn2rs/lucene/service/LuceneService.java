@@ -43,7 +43,7 @@ public class LuceneService {
     @PostConstruct
     void init() throws IOException {
         try {
-            var directorySn = FSDirectory.open(Path.of(indexDir + "/offers"));
+            var directorySn = FSDirectory.open(Path.of(indexDir + "/offer"));
             IndexReader indexReaderSn = DirectoryReader.open(directorySn);
             searcherSn = new IndexSearcher(indexReaderSn);
             analyzer = new KeywordAnalyzer();

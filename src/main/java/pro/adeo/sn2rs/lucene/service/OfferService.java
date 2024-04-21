@@ -1,10 +1,7 @@
 package pro.adeo.sn2rs.lucene.service;
 
 import jakarta.annotation.PostConstruct;
-import org.apache.lucene.analysis.Analyzer;
-import org.apache.lucene.analysis.TokenStream;
 import org.apache.lucene.analysis.core.KeywordAnalyzer;
-import org.apache.lucene.analysis.tokenattributes.CharTermAttribute;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.index.DirectoryReader;
 import org.apache.lucene.index.IndexNotFoundException;
@@ -36,7 +33,7 @@ public class OfferService {
     @PostConstruct
     void init() throws IOException {
         try {
-            var directorySn = FSDirectory.open(Path.of(indexDir + "/offers"));
+            var directorySn = FSDirectory.open(Path.of(indexDir + "/offer"));
             IndexReader indexReaderOffer = DirectoryReader.open(directorySn);
             searcherOffer = new IndexSearcher(indexReaderOffer);
             analyzer = new KeywordAnalyzer();
@@ -44,17 +41,6 @@ public class OfferService {
             log.error("Index [offers] не найден: {}", indexDir);
         }
 
-    }
-
-    public List<String> analyze(String text, Analyzer analyzer) throws IOException {
-        List<String> result = new ArrayList<>();
-        TokenStream tokenStream = analyzer.tokenStream(FIELD_NAME, text);
-        CharTermAttribute attr = tokenStream.addAttribute(CharTermAttribute.class);
-        tokenStream.reset();
-        while (tokenStream.incrementToken()) {
-            result.add(attr.toString());
-        }
-        return result;
     }
 
     public List<Document> querySearch(String inField, String queryString) throws IOException, ParseException {

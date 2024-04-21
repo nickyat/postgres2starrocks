@@ -36,4 +36,11 @@ public class ProductController {
         return productService.term(inField, queryString);
     }
 
+    @Operation(summary = "+Join Offer: поиск через TermQuery (string поля, сase sensitive) keyword analyser")
+    @GetMapping("/termQueryJoin")
+    DocSummaryResponse termJoin(@RequestParam String productField, @RequestParam String queryProductString,
+                                @RequestParam String offerField, @RequestParam String queryOfferString) throws IOException {
+        return new DocSummaryResponse(productService.termJoin(productField, queryProductString, offerField, queryOfferString));
+    }
+
 }
