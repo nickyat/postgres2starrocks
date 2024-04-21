@@ -40,7 +40,7 @@ public class BatchService {
             limitTerm = " limit " + fetchLimit;
         }
         jdbcTemplate.query("select * from prices.supplier_nomenclature where gn_id=5765 " + limitTerm, rs -> {
-            while (rs.next()) {
+            do {
 
                 // process it
                 if (rs.getString("pn_draft") != null && rs.getString("fabric") != null) {
@@ -71,7 +71,7 @@ public class BatchService {
                 if (count.get() % 10000 == 0) {
                     System.out.println("rows: " + count.get());
                 }
-            }
+            } while (rs.next());
         });
         if (!batch.isEmpty()) {
             try {
@@ -94,9 +94,8 @@ public class BatchService {
         if (fetchLimit > 0) {
             limitTerm = " limit " + fetchLimit;
         }
-        jdbcTemplate.query("select * from prices.goods_nomenclature where id in (5765,5766) " + limitTerm, rs -> {
-            while (rs.next()) {
-
+        jdbcTemplate.query("select * from prices.goods_nomenclature where id in (5765) " + limitTerm, rs -> {
+            do {
                 // process it
                 if (rs.getString("pn_draft") != null && rs.getString("fabric") != null) {
                     batch.add(new Product(
@@ -123,7 +122,7 @@ public class BatchService {
                 if (count.get() % 10000 == 0) {
                     System.out.println("rows: " + count.get());
                 }
-            }
+            } while (rs.next());
         });
         if (!batch.isEmpty()) {
             try {
