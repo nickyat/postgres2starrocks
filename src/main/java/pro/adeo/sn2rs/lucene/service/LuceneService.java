@@ -53,7 +53,7 @@ public class LuceneService {
         try {
             var directoryGn = FSDirectory.open(Path.of(indexDir + "/product"));
             IndexReader indexReaderGn = DirectoryReader.open(directoryGn);
-            searcherSn = new IndexSearcher(indexReaderGn);
+            searcherGn = new IndexSearcher(indexReaderGn);
         } catch (IndexNotFoundException e) {
             log.error("Index [product] не найден: {}", indexDir);
         }
