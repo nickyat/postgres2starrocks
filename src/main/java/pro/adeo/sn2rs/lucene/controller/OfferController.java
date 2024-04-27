@@ -35,5 +35,4 @@ public class OfferController {
     List<Document> term(@RequestParam String inField, @RequestParam String queryString) throws IOException {
         return offerService.term(inField, queryString);
     }
-
 }

@@ -2,6 +2,7 @@ package pro.adeo.sn2rs.sr.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -31,4 +32,9 @@ public class SrController {
         return batchService.fillProductIndex(limit);
     }
 
+    @Operation(summary = "Обновить offer(cost,remain) по prices.price")
+    @GetMapping("/offerUpdateByPrice")
+    String offerUpdateByPrice(@RequestParam Integer limit) throws IOException {
+        return batchService.offerUpdateByPrice(limit);
+    }
 }

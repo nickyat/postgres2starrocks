@@ -98,4 +98,29 @@ public class ProductService {
         }
         return documents;
     }
+
+    public List<Document> termJoinReverse(String productField,
+                                          String queryProductString, String offerField, String queryOfferString) throws IOException {
+        boolean multipleValuesPerDocument = false;
+
+        Query fromQueryProduct = new TermQuery(new Term(productField, queryProductString));
+        Query fromQueryOffer = new TermQuery(new Term(offerField, queryOfferString));
+
+        Query joinQuery = JoinUtil.createJoinQuery("product_id", multipleValuesPerDocument, "id", fromQueryOffer, searcherOffer, ScoreMode.None);
+
+        BooleanQuery.Builder finalQuery = new BooleanQuery.Builder();
+        BooleanQuery.Builder q1 = new BooleanQuery.Builder();
+        q1.add(fromQueryProduct, BooleanClause.Occur.SHOULD);
+
+        finalQuery.add(q1.build(), BooleanClause.Occur.MUST);
+        finalQuery.add(joinQuery, BooleanClause.Occur.MUST);
+        Query queryForSearching = finalQuery.build();
+
+        TopDocs topDocs = searcherProduct.search(queryForSearching, 100);
+        List<Document> documents = new ArrayList<>();
+        for (ScoreDoc scoreDoc : topDocs.scoreDocs) {
+            documents.add(searcherOffer.doc(scoreDoc.doc));
+        }
+        return documents;
+    }
 }

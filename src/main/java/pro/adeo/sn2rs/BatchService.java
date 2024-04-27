@@ -10,6 +10,7 @@ import pro.adeo.sn2rs.sr.service.SimpleSupplierNomenclatureService;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -39,8 +40,10 @@ public class BatchService {
         if (fetchLimit > 0) {
             limitTerm = " limit " + fetchLimit;
         }
+        Date pDate = new Date(2024 - 1900, 3, 1);
+
         // where gn_id=5765
-        jdbcTemplate.query("select * from prices.supplier_nomenclature s left join prices.supplier_nomenclature_price p on p.id=s.id " + limitTerm, rs -> {
+        jdbcTemplate.query("select * from prices.supplier_nomenclature " + limitTerm, rs -> {
             do {
 
                 // process it
@@ -56,12 +59,12 @@ public class BatchService {
                             "0",
                             rs.getString("gn_id"),
                             rs.getString("name"),
-                            Math.round(rs.getFloat("min_cost") * 100),
-                            rs.getInt("moq"),
+                            1000,
+                            1,
                             "10",
                             rs.getString("supplier_code"),
-                            rs.getDate("last_available"),
-                            rs.getBoolean("in_price")
+                            rs.getDate("not_available_since"),
+                            rs.getDate("not_available_since") != null && rs.getDate("not_available_since").after(pDate)
                     ));
                 } else {
                     System.out.printf("skip: pn_draft: %s fabric: %s %s %n", rs.getString("pn_draft"), rs.getString("fabric"), rs.getString("name"));
@@ -144,4 +147,40 @@ public class BatchService {
     }
 
 
+    public String offerUpdateByPrice(int limit) throws IOException {
+        String limitTerm = "";
+        if (limit > 0) limitTerm = " limit " + limit;
+        Date pDate = new Date(2024 - 1900, 3, 1);
+        jdbcTemplate.query("select *,COALESCE(supplier_nomenclature_id,0) as sn_id from prices.price p left join prices.c_brands b on b.gid=p.gid   " + limitTerm, rs -> {
+            do {
+                // process it
+                if (rs.getLong("sn_id") != 0) {
+                    try {
+                        simpleSupplierNomenclatureService.updatePrice(new Offer(
+                                        rs.getString("sn_id"),
+                                        rs.getString("pn_clean"),
+                                        rs.getString("pn_draft"),
+                                        rs.getString("brand"),
+                                        null,
+                                        rs.getString("storage_id"),
+                                        "",
+                                        rs.getString("gn_id"),
+                                        rs.getString("pn_price_desc"),
+                                        Math.round(rs.getFloat("cost_eval")) * 100,
+                                        rs.getInt("min_cnt"),
+                                        rs.getString("remains"),
+                                        rs.getString("supplier_code"),
+                                        pDate,
+                                        true
+                                )
+                        );
+                    } catch (IOException e) {
+                        throw new RuntimeException(e);
+                    }
+                }
+            } while (rs.next());
+        });
+        simpleSupplierNomenclatureService.closeIndex();
+        return "done";
+    }
 }
